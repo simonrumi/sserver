@@ -1,0 +1,80 @@
+{
+  "rows": [
+    {
+      "id": 0,
+      "isVisible": true,
+      "cells": [
+        {
+          "cellId": "0_0",
+          "col": 0,
+          "contents": "foo",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "0_1",
+          "col": 1,
+          "contents": "bar",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "0_2",
+          "col": 2,
+          "contents": "boo",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "0_3",
+          "col": 2,
+          "contents": "far",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "isVisible": true,
+      "cells": [
+        {
+          "cellId": "1_0",
+          "col": 0,
+          "contents": "coo",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "1_1",
+          "col": 1,
+          "contents": "cat",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "1_2",
+          "col": 2,
+          "contents": "bat",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        },
+        {
+          "cellId": "1_3",
+          "col": 2,
+          "contents": "bot",
+          "isVisible": true,
+          "isRowFilter": false,
+          "isColumnFilter": false
+        }
+      ]
+    }
+  ]
+}
