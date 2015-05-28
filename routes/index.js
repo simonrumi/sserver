@@ -4,8 +4,9 @@ var express = require('express');
 var router = express.Router();
 var jsonFileParser = require('jsonfile');
 var regex = {
-	matchFilenameDotJson: /\w+\.[jJ][sS][oO][nN]/,
-	matchPathAfterJsonFile: /\w+\.[jJ][sS][oO][nN](.*)/,
+	matchFilenameDotJson: /\w+\.json/i,
+	matchPathAfterJsonFile: /\w+\.json(.*)/i,
+	matchUpdatePath: /update\w+\.json(.*)/i,
 }
 
 /* home page. */
@@ -103,7 +104,6 @@ var tryAsKey = function(key, object) {
 	return false;
 }
 
-
 /*
 * Note that getting the last match from a regex str.match() means that we will get either  
 *  - the contents of the last set of parentheses, if there are any parentheses in the pattern
@@ -117,6 +117,30 @@ var getLastMatch = function(string, pattern) {
 		match = arrayFromPatternMatch[arrayFromPatternMatch.length-1];
 	}
 	return match;
+}
+
+router.patch(regex.matchUpdatePath, function(request, response, next) {
+	console.log('request path is ' + request.path);
+	var errStr;
+	var jsonFile = findJsonFileInPath(request.path);
+	var updatePath = findUpdatePathAfterJsonFileName(request.path);
+	updateJson(jsonFile, updatePath, request, response);
+});
+
+var findUpdatePathAfterJsonFileName = function(path) {
+	getLastMatch(path, regex.matchUpdatePath);
+}
+
+var updateJson = function(jsonFile, updatePath, request, response) {
+	// if (jsonFile) {
+	// 	jsonFileParser.readFile(jsonFile, function(err, contents) {
+	// 		// QQQQQQQQQQQQQQQQ get the file here
+	// 		jsonFileParser.writeFile(jsonFile, function(err) {
+	// 			// QQQQQQQQQQQQQ write the file here
+	// 		}
+	// 	}
+	// 	// QQQQQQQQQQ better than the above would be to deal with streams or promises or something
+	// }
 }
 
 module.exports = router;
