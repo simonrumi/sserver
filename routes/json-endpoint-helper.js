@@ -6,19 +6,23 @@ var jsonEndpointHelper = {
 	regex : {
 		matchFilenameDotJson: /\w+\.json/i,
 		matchPathAfterJsonFile: /\w+\.json(.*)/i,
-		matchUpdatePath: /update\w+\.json(.*)/i,
+		matchUpdatePath: /update.*\w+\.json(.*)/i,
+	},
+	
+	findJsonFileInPath : function(path) {
+		return this.getLastMatch(path, this.regex.matchFilenameDotJson);
 	},
 	
 	serveJson : function(jsonFile, request, response) {
 		var endpoint;
 		var endpointObj;
-		var endpointHelper = this;
+		var helper = this;
 		if (jsonFile) {
 			jsonFileParser.readFile(jsonFile, function(err, contents) {
 				if (!err) {
-					endpoint = endpointHelper.getJsonEndpoint(request.path);
+					endpoint = helper.getJsonEndpoint(request.path);
 					console.log('serveFile, json file: ' + jsonFile + ', endpoint: ' + endpoint);
-					endpointObj = endpointHelper.traverseJsonToEndpoint(contents, endpoint);
+					endpointObj = helper.traverseJsonToEndpoint(contents, endpoint);
 					response.json(endpointObj);
 				} else {
 					console.log(err);
@@ -32,10 +36,6 @@ var jsonEndpointHelper = {
 			response.writeHead(404);
 			response.end(errStr);
 		}
-	},
-	
-	findJsonFileInPath : function(path) {
-		return this.getLastMatch(path, this.regex.matchFilenameDotJson);
 	},
 	
 	getJsonEndpoint : function(path) {
@@ -116,6 +116,38 @@ var jsonEndpointHelper = {
 			match = arrayFromPatternMatch[arrayFromPatternMatch.length-1];
 		}
 		return match;
+	},
+	
+	updateJson : function(jsonFile, updatePath, request, response) {
+		console.log('updateJson: jsonFile = ' + jsonFile + ', updatePath = ' + updatePath);
+		var newContent;
+		var helper = this;
+		if (jsonFile) {
+			jsonFileParser.readFile(jsonFile, function(err, contents) {
+				helper.writeToJsonFile(jsonFile,contents);				
+			});
+			// QQQQQQQQQQ better than the fs thing above would be to deal with streams or promises or something
+		} else {
+			errStr = 'No json file found:' + jsonFile;
+			console.log(errStr);
+			response.writeHead(404);
+			response.end(errStr);
+		}
+	},
+	
+	writeToJsonFile : function(jsonFile, newContent) {
+		jsonFileParser.writeFile(jsonFile, newContent, function(err) {
+			if (!err) {
+				return true;
+			} else {
+				console.log(err);
+				return false;
+			}
+		});
+	},
+	
+	getUpdatePathAfterJsonFileName : function(path) {
+		return this.getLastMatch(path, this.regex.matchUpdatePath);
 	},
 };
 

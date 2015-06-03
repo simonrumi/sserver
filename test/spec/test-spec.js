@@ -5,14 +5,16 @@
 'use strict';
 
 var request = require('request');
+var jsonFileParser = require('jsonfile');
 var expressApp = require('../../app.js');
 var endpointHelper = require('../../routes/json-endpoint-helper');
-var baseUrl = 'http://localhost:3000/';
+
+var BASE_URL = 'http://localhost:3000/';
 
 (function () {
     describe('Make an ajax get call', function() {    	
 		it('should return the contents of row 0, cell 0', function() {
-            request.get(baseUrl + 'db.json/rows/0/cells/0/contents', function(error, response, body) {
+            request.get(BASE_URL + 'db.json/rows/0/cells/0/contents', function(error, response, body) {
                 expect(body).toEqual('foo');
                 expect(response.statusCode).toBe(200);
                 done();
@@ -39,8 +41,8 @@ var baseUrl = 'http://localhost:3000/';
                 expect(endpointHelper.findJsonFileInPath(jsonPath)).toBe('myFile.json');
             });
             
-            it('should get the endpoint after the json file within a path', function() {
-                expect(endpointHelper.getJsonEndpoint(jsonPath)).toBe('/followed/by/more/stuff')
+            it('should get the endpoint after the json file from a path', function() {
+                expect(endpointHelper.getJsonEndpoint(jsonPath)).toBe('/followed/by/more/stuff');
             });
         });
         
@@ -72,7 +74,7 @@ var baseUrl = 'http://localhost:3000/';
             });
         });
 
-         describe('Traversing a path to an endpoint within a json object', function() {
+        describe('Traversing a path to an endpoint within a json object', function() {
             var arr = ['first', 'second', 'third'];
             var obj = {'parent': {'child': arr} };
             
@@ -95,6 +97,55 @@ var baseUrl = 'http://localhost:3000/';
                 var endpoint = '/parent/child/99';
                 expect(endpointHelper.traverseJsonToEndpoint(obj, endpoint)).toBe(false);
             });
-         });
+        });
+    });
+
+    describe('Test helper files for the Update handler', function() {
+        
+        describe('Matching parts of the path', function() {
+            it('should get the endpoint after the word "update" from a path', function() {
+                var updatePath = '/update/some/path/to/myFile.json/endpoint/here';
+                expect(endpointHelper.getUpdatePathAfterJsonFileName(updatePath)).toBe('/endpoint/here'); 
+            });
+        });
+        
+        describe('Posting and updating', function() {
+            it('should write to a JSON file', function() {
+                var resultingContent;
+                var file = 'test.json';
+                var newContent = {'name': 'test file', 'value': 'this is some test content'};
+
+                expect( endpointHelper.writeToJsonFile(file, newContent).toBe(true) );
+
+                jsonFileParser.readFile(file, function(err, contents) {
+                    if (!err) {
+                        resultingContent = contents;
+                    } else {
+                        console.log(err);
+                    }
+                });
+                expect(resultingContent.toEqual(newContent));
+            });
+            
+            it('should do a POST', function() {
+                var updatedJsonContent = {
+                    contents: 'this is new content',
+                };
+                var options = {
+                    uri: BASE_URL + 'db.json/rows/0/cells/0',
+                    method: 'POST',
+                    json: true,
+                    body: updatedJsonContent,
+                };
+                
+                request(options, function(error, response, body) {
+                    expect(response.statusCode).toBe(200);
+                    expect(body).toEqual('this is new content');
+                    expect(response.statusCode).toBe(200);
+                    done();
+                }); 
+            });
+        });
+            
     });
 })();
