@@ -62,59 +62,66 @@ var BASE_URL = 'http://localhost:3000/';
             
             it('should thow an exception if there is no object at the given endpoint path', function() {
                 var endpoint = '/parent/noexistant';
-                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toThrow();
+                expect(endpointHelper.getJsonAtEndpoint.bind(null, obj, endpoint)).toThrow();
             });
             
             it('should thow an exception if there is no array element at the given endpoint path', function() {
                 var endpoint = '/parent/child/99';
-                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toThrow();
+                expect(endpointHelper.getJsonAtEndpoint.bind(null, obj, endpoint)).toThrow();
             });
         });
     });
 
-    describe('Test helper files for the Update handler', function() {
-        
-        describe('Posting and updating', function() {
-            it('should write to a JSON file', function() {
-                var resultingContent;
-                var file = 'test.json';
-                var newContent = {'name': 'test file', 'value': 'this is some test content'};
+    describe('Test helper files for the Update handler', function() {            
+        it('should write to a JSON file', function() {
+            var resultingContent;
+            var file = 'test.json';
+            var newContent = {'name': 'test file', 'value': 'this is some test content'};
+            
+            expect(endpointHelper.writeToJsonFile.bind(null, file, newContent)).not.toThrow();
 
-                expect( endpointHelper.writeToJsonFile(file, newContent).not.toThrow() );
-
-                jsonFileParser.readFile(file, function(err, contents) {
-                    if (!err) {
-                        resultingContent = contents;
-                    } else {
-                        console.log(err);
-                    }
-                });
+            jsonFileParser.readFile(file, function(err, contents) {
+                if (!err) {
+                    resultingContent = contents;
+                } else {
+                    console.log(err);
+                }
                 expect(resultingContent.toEqual(newContent));
-            });
-            
-            it('should throw and error when there is no JSON file', function() {
-                expect( endpointHelper.writeToJsonFile(file, newContent).toThrow() );
-            });
-            
-            it('should do a POST', function() {
-                var updatedJsonContent = {
-                    contents: 'this is new content',
-                };
-                var options = {
-                    uri: BASE_URL + 'db.json/rows/0/cells/0',
-                    method: 'POST',
-                    json: true,
-                    body: updatedJsonContent,
-                };
-                
-                request(options, function(error, response, body) {
-                    expect(response.statusCode).toBe(200);
-                    expect(body).toEqual('this is new content');
-                    expect(response.statusCode).toBe(200);
-                    done();
-                }); 
-            });
+            });  
         });
+    });    
+        
+    describe('Posting and updating', function() {   
+        var that = this;
+        var jsonFile = 'db.json';
+        var newContent = 'this is new content';
+        var endpointPath = 'rows/0/cells/0/contents';
+        
+        var updateQuery = {
+            content: newContent,
+            'json-file': jsonFile,
+            endpoint: endpointPath
+        };
+        var options = {
+            uri: BASE_URL + 'update',
+            method: 'POST',
+            json: true,
+            body: updateQuery,
+        };
+         
+        it('should update a field, within the .json file, with a string', function() {
+            var updatedContents;
             
+            request(options, function(error, response, body) {
+                expect(response.statusCode).toBe(200);
+                done();
+                jsonFileParser.readFile(jsonFile, function(err, contents) {
+                    updatedContents = endpointHelper.getJsonAtEndpoint(contents, that.endpointPath);
+                    expect(updatedContents).toEqual(that.newContent);
+                });
+            }); 
+        });  
     });
+            
+    
 })();

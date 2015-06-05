@@ -82,6 +82,10 @@ var jsonEndpointHelper = {
 		response.end(err);
 	},				
 	
+	//TODO - put in a locking system, so that any writes will block anyone else from writing
+	// apparently MongoDb also blocks readers, but seems like we wouldn't need to do that
+	// if someone reads data that is out of date, well it would have been out of date if they
+	// did the read miliseconds before, when the write hadn't started
 	updateJson : function(request, response) {
 		var i;
 		var errStr;
