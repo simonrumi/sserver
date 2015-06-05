@@ -18,17 +18,12 @@ router.get('/', function(req, res, next) {
 */
 router.get(helper.regex.matchFilenameDotJson, function(request, response, next) {
 	console.log('GET request path is ' + request.path);
-	var errStr;
-	var jsonFile = helper.findJsonFileInPath(request.path);
-	helper.serveJson(jsonFile, request, response);
+	helper.serveJson(request, response);
 });
 
-router.post(helper.regex.matchUpdatePath, function(request, response, next) {
-	console.log('POST request path is ' + request.path);
-	var errStr;
-	var jsonFile = helper.findJsonFileInPath(request.path);
-	var updatePath = helper.getUpdatePathAfterJsonFileName(request.path);
-	helper.updateJson(jsonFile, updatePath, request, response);
+router.post('/update', function(request, response, next) { // helper.regex.matchUpdatePath
+	console.log('method is ' + request.method + ', request path is ' + request.path + ', request.body is ' + JSON.stringify(request.body));
+	helper.updateJson(request, response);
 });
 
 module.exports = router;

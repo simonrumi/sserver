@@ -2,15 +2,16 @@
 <html>
     <head>
         <title>update page</title>
-         <script src="javascripts/update-experiment.js"></script>
          <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     </head>
     <body>
     	<p>post page</p>
     	
-    	<form action="update/db.json/rows/0/contents" method="POST">
+    	<form enctype="application/x-www-form-urlencoded" action="/update" method="POST"> <!-- /db.json/rows/0/contents -->
 			Cell Contents:<br>
-			<input type="text" value="foo new"><br>
+			<input type="text" name="content" value="foo new"><br>
+            <input type="text" name="json-file" value="db.json"><br>
+            <input type="text" name="endpoint" value="rows/0/contents"><br>
 			<input type="submit" value="Submit"><br>
 		</form>
     </body>

@@ -36,7 +36,8 @@
           "isRowFilter": false,
           "isColumnFilter": false
         }
-      ]
+      ],
+      "contents": "foo new"
     },
     {
       "id": 1,

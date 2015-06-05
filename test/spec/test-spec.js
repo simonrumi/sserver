@@ -42,35 +42,7 @@ var BASE_URL = 'http://localhost:3000/';
             });
             
             it('should get the endpoint after the json file from a path', function() {
-                expect(endpointHelper.getJsonEndpoint(jsonPath)).toBe('/followed/by/more/stuff');
-            });
-        });
-        
-        describe('Getting a value from object with a key or index', function() {
-            var obj = {'myKey' : 'myValue'};
-            var arr = ['first value','second value', 'third value'];
-            
-            it('should return the value, given a key and an object', function() {
-                expect(endpointHelper.tryAsKey('myKey',obj)).toBe('myValue');
-            });
-            
-            it('should return false, if the key does not exist in the object', function() {
-                expect(endpointHelper.tryAsKey('nonexistant',obj)).toBe(false);
-            });
-            
-            it('should return the correct element, given an index and an array', function() {
-                var indexStr = '1';
-                expect(endpointHelper.tryAsArrayIndex(indexStr,arr)).toBe('second value');
-            });
-            
-            it('should return false, if the index is out of range', function() {
-                var indexStr = '4';
-                expect(endpointHelper.tryAsArrayIndex(indexStr,arr)).toBe(false);
-            });
-            
-            it('should return false, if the object is not an array', function() {
-                var indexStr = '0';
-                expect(endpointHelper.tryAsArrayIndex(indexStr,obj)).toBe(false);
+                expect(endpointHelper.getEndpointFromPath(jsonPath)).toBe('/followed/by/more/stuff');
             });
         });
 
@@ -80,34 +52,27 @@ var BASE_URL = 'http://localhost:3000/';
             
             it('should return a string nested within the json object, based on the endpoint path', function() {
                 var endpoint = '/parent/child/1';
-                expect(endpointHelper.traverseJsonToEndpoint(obj, endpoint)).toBe('second');
+                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toBe('second');
             });
             
             it('should return an array nested within the json object, based on the endpoint path', function() {
                 var endpoint = '/parent/child';
-                expect(endpointHelper.traverseJsonToEndpoint(obj, endpoint)).toBe(arr);
+                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toBe(arr);
             });
             
-            it('should return false if there is no object at the given endpoint path', function() {
+            it('should thow an exception if there is no object at the given endpoint path', function() {
                 var endpoint = '/parent/noexistant';
-                expect(endpointHelper.traverseJsonToEndpoint(obj, endpoint)).toBe(false);
+                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toThrow();
             });
             
-            it('should return false if there is no array element at the given endpoint path', function() {
+            it('should thow an exception if there is no array element at the given endpoint path', function() {
                 var endpoint = '/parent/child/99';
-                expect(endpointHelper.traverseJsonToEndpoint(obj, endpoint)).toBe(false);
+                expect(endpointHelper.getJsonAtEndpoint(obj, endpoint)).toThrow();
             });
         });
     });
 
     describe('Test helper files for the Update handler', function() {
-        
-        describe('Matching parts of the path', function() {
-            it('should get the endpoint after the word "update" from a path', function() {
-                var updatePath = '/update/some/path/to/myFile.json/endpoint/here';
-                expect(endpointHelper.getUpdatePathAfterJsonFileName(updatePath)).toBe('/endpoint/here'); 
-            });
-        });
         
         describe('Posting and updating', function() {
             it('should write to a JSON file', function() {
@@ -115,7 +80,7 @@ var BASE_URL = 'http://localhost:3000/';
                 var file = 'test.json';
                 var newContent = {'name': 'test file', 'value': 'this is some test content'};
 
-                expect( endpointHelper.writeToJsonFile(file, newContent).toBe(true) );
+                expect( endpointHelper.writeToJsonFile(file, newContent).not.toThrow() );
 
                 jsonFileParser.readFile(file, function(err, contents) {
                     if (!err) {
@@ -125,6 +90,10 @@ var BASE_URL = 'http://localhost:3000/';
                     }
                 });
                 expect(resultingContent.toEqual(newContent));
+            });
+            
+            it('should throw and error when there is no JSON file', function() {
+                expect( endpointHelper.writeToJsonFile(file, newContent).toThrow() );
             });
             
             it('should do a POST', function() {
