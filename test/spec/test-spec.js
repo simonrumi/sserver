@@ -111,7 +111,6 @@ var BASE_URL = 'http://localhost:3000/';
          
         it('should update a field, within the .json file, with a string', function() {
             var updatedContents;
-            
             request(options, function(error, response, body) {
                 expect(response.statusCode).toBe(200);
                 done();
@@ -120,7 +119,11 @@ var BASE_URL = 'http://localhost:3000/';
                     expect(updatedContents).toEqual(that.newContent);
                 });
             }); 
-        });  
+        });
+        
+        it('should lock the json file while it is being written to', function() {
+               expect('this test is not written yet').toBe(false); 
+        });
     });
             
     

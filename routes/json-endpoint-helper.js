@@ -105,7 +105,8 @@ var jsonEndpointHelper = {
 				try {
 					helper.writeToJsonFile(jsonFile,contents);	
 					response.writeHead(200);
-					response.end('<p>update completed:</p><p>' + JSON.stringify(contents,null,3) + '</p>');
+					// response.end('<p>update completed:</p><p>' + JSON.stringify(contents,null,3) + '</p>');
+					response.end(JSON.stringify(contents,null,3));
 				} catch (err2) {
 					displayError(err2, response);
 				}

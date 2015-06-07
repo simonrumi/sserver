@@ -2,18 +2,57 @@
 <html>
     <head>
         <title>update page</title>
-         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+         
+        <script>   
+            $(document).ready( function() {
+                
+                $('#updateForm').submit( function(evt) {
+                    var updateQuery = {};
+                    var formArray = $('#updateForm').serializeArray();
+                    $.each(formArray, function(index, formArrayValue) {
+                        updateQuery[formArrayValue.name] = formArrayValue.value;
+                    });
+                    $.ajax({ 
+                        url: '/update', 
+                        method: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        data: JSON.stringify(updateQuery),
+                        processData: false,
+                        
+                        success: function(returnedData, textStatus, jqXHR ) {
+                            console.log('ajax result is: ' + returnedData);
+                            $("#data").html(JSON.stringify(returnedData));
+                        },
+                        
+                        error: function(jqXHR, status, errorThrown) {
+                            console.log("An error occured: " + status + " " + errorThrown);
+                            alert("An error occured: " + status + " " + errorThrown);
+                        },
+                    });
+                    evt.preventDefault();
+                });
+            });
+        </script>
+         
+         
     </head>
     <body>
     	<p>post page</p>
-    	
-    	<form enctype="application/x-www-form-urlencoded" action="/update" method="POST"> <!-- /db.json/rows/0/contents -->
-			Cell Contents:<br>
-			<input type="text" name="content" value="foo new"><br>
-            <input type="text" name="json-file" value="db.json"><br>
-            <input type="text" name="endpoint" value="rows/0/contents"><br>
-			<input type="submit" value="Submit"><br>
-		</form>
+    	<p>
+        	<form id="updateForm" >
+    			Cell Contents:<br>
+    			<input type="text" name="content" value="foo new"><br>
+                <input type="text" name="json-file" value="db.json"><br>
+                <input type="text" name="endpoint" value="rows/0/cells/0/contents"><br>
+    			<button type="submit" value="Submit">Submit<br>
+                <button id="updateJson">Update</button>
+    		</form>
+        </p>
+        <p>
+            <div id="data"></div>
+        </p>
     </body>
 </html>
     

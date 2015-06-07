@@ -7,7 +7,7 @@
         {
           "cellId": "0_0",
           "col": 0,
-          "contents": "foo",
+          "contents": "foo newnew new new new",
           "isVisible": true,
           "isRowFilter": false,
           "isColumnFilter": false
@@ -36,8 +36,7 @@
           "isRowFilter": false,
           "isColumnFilter": false
         }
-      ],
-      "contents": "foo new"
+      ]
     },
     {
       "id": 1,
