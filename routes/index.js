@@ -3,6 +3,8 @@
 var express = require('express');
 var router = express.Router();
 var helper = require('./json-endpoint-helper');
+var updateHelper = require('./update-helper');
+var jsonFileParser = require('jsonfile');
 
 /* home page. */
 router.get('/', function(req, res, next) {
@@ -21,9 +23,9 @@ router.get(helper.regex.matchFilenameDotJson, function(request, response, next) 
 	helper.serveJson(request, response);
 });
 
-router.post('/update', function(request, response, next) { // helper.regex.matchUpdatePath
+router.post('/update', function(request, response, next) {
 	console.log('method is ' + request.method + ', request path is ' + request.path + ', request.body is ' + JSON.stringify(request.body));
-	helper.updateJson(request, response);
+	updateHelper.updateJson(request, response);
 });
 
 module.exports = router;

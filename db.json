@@ -7,7 +7,7 @@
         {
           "cellId": "0_0",
           "col": 0,
-          "contents": "foo newnew new new new",
+          "contents": "foo new",
           "isVisible": true,
           "isRowFilter": false,
           "isColumnFilter": false

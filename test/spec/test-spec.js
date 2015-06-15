@@ -8,6 +8,7 @@ var request = require('request');
 var jsonFileParser = require('jsonfile');
 var expressApp = require('../../app.js');
 var endpointHelper = require('../../routes/json-endpoint-helper');
+var updateHelper = require('../../routes/update-helper');
 
 var BASE_URL = 'http://localhost:3000/';
 
@@ -77,9 +78,10 @@ var BASE_URL = 'http://localhost:3000/';
             var resultingContent;
             var file = 'test.json';
             var newContent = {'name': 'test file', 'value': 'this is some test content'};
+            var callback = function() {};
+            var callingObject = {currentJsonFile : file}
             
-            expect(endpointHelper.writeToJsonFile.bind(null, file, newContent)).not.toThrow();
-
+            expect(updateHelper.writeToJsonFile.bind(callingObject, newContent, callback)).not.toThrow(); 
             jsonFileParser.readFile(file, function(err, contents) {
                 if (!err) {
                     resultingContent = contents;
@@ -119,6 +121,36 @@ var BASE_URL = 'http://localhost:3000/';
                     expect(updatedContents).toEqual(that.newContent);
                 });
             }); 
+        });
+        
+        it('should throw an error when trying to update a field that does not exist within the .json file', function() {
+            updateQuery.endpoint = 'bad/path';
+            options.body = updateQuery; 
+            request(options, function(error, response, body) {
+                expect(response.statusCode).toBe(400);
+                expect(response.statusMessage).toContain('Could not update');
+                done();
+            });
+        });
+        
+        it('should throw an error when trying to update a non-existant .json file', function() {
+            updateQuery['json-file'] = 'nonexistant.json';
+            options.body = updateQuery;
+            request(options, function(error, response, body) {
+                expect(response.statusCode).toBe(400);
+                expect(response.statusMessage).toContain('Could not update');
+                done();
+            });
+        });
+        
+        it('should throw an error when trying to update an empty .json file', function() {
+            updateQuery['json-file'] = 'empty.json';
+            options.body = updateQuery;
+            request(options, function(error, response, body) {
+                expect(response.statusCode).toBe(400);
+                expect(response.statusMessage).toContain('Could not update');
+                done();
+            });
         });
         
         it('should lock the json file while it is being written to', function() {

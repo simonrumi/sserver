@@ -1,13 +1,6 @@
 'use strict';
 
-var jsonFileParser = require('jsonfile');
-
 var jsonEndpointHelper = {
-	regex : {
-		matchFilenameDotJson: /\w+\.json/i,
-		matchPathAfterJsonFile: /\w+\.json(.*)/i,
-	},
-	
 	serveJson : function(request, response) {
 		var endpoint;
 		var endpointObj;
@@ -41,6 +34,11 @@ var jsonEndpointHelper = {
 	
 	getEndpointFromPath : function(path) {
 		return this.getLastMatch(path, this.regex.matchPathAfterJsonFile);
+	},
+	
+	regex : {
+		matchFilenameDotJson: /\w+\.json/i,
+		matchPathAfterJsonFile: /\w+\.json(.*)/i,
 	},
 	
 	getJsonAtEndpoint : function(jsonObj, endpoint) {
@@ -78,73 +76,12 @@ var jsonEndpointHelper = {
 	
 	displayError : function(err, response) {
 		console.log(err);
-		response.writeHead(404);
+		response.writeHead(400);
+		response.statusMessage = err;
 		response.end(err);
 	},				
 	
-	//TODO - put in a locking system, so that any writes will block anyone else from writing
-	// apparently MongoDb also blocks readers, but seems like we wouldn't need to do that
-	// if someone reads data that is out of date, well it would have been out of date if they
-	// did the read miliseconds before, when the write hadn't started
-	updateJson : function(request, response) {
-		var i;
-		var errStr;
-		var endpointParts;
-		var helper = this;
-		var jsonFile = request.body['json-file']; 
-		var updateEndpoint = request.body['endpoint'];
-		var newContent = request.body['content'];
-		console.log('updateJson: jsonFile = ' + jsonFile + ', updateEndpoint = ' + updateEndpoint + 'newContent = ' + newContent);
-		
-		if (jsonFile) {
-			jsonFileParser.readFile(jsonFile, function(err, contents) {
-				console.log('updateJson: read jsonFile and got contents: ' + JSON.stringify(contents));
-				endpointParts = updateEndpoint.split('/');
-				contents = helper.updateJsonAtEndpoint(endpointParts, contents, newContent);
-				console.log('\n updateJson: updated json to: ' + JSON.stringify(contents));
-				try {
-					helper.writeToJsonFile(jsonFile,contents);	
-					response.writeHead(200);
-					// response.end('<p>update completed:</p><p>' + JSON.stringify(contents,null,3) + '</p>');
-					response.end(JSON.stringify(contents,null,3));
-				} catch (err2) {
-					displayError(err2, response);
-				}
-				
-			});
-			// QQQQQQQQQQ better than the fs thing above would be to deal with streams or promises or something
-		} else {
-			errStr = 'No json file found:' + jsonFile;
-			displayError(errStr, response);
-		}
-	},
 	
-	updateJsonAtEndpoint : function(endpointPathParts, jsonObj, newContent) {
-		var objectKey;
-		var childObj;
-		if (endpointPathParts.length === 1) {
-			jsonObj[endpointPathParts[0]] = newContent; // we've reached the end of the endpoint path, so it's time to put in the newContent
-			return jsonObj;
-		} else {
-			objectKey = endpointPathParts.shift(); // the current key is the first element in the array
-			childObj = jsonObj[objectKey]; // use that key to get the childObj we're interested in
-			childObj = this.updateJsonAtEndpoint(endpointPathParts, childObj, newContent); // recursively update the childObj
-			jsonObj[objectKey] = childObj; // assign the updated childObj to the spot we got it from in the parent object
-			return jsonObj;
-		}
-	},
-	
-	writeToJsonFile : function(jsonFile, newContent) {
-		console.log('writeToJsonFile: jsonFile=' + jsonFile + ', newContent=' + JSON.stringify(newContent));
-		jsonFileParser.writeFile(jsonFile, newContent, function(err) {
-			if (!err) {
-				console.log('writeToJsonFile: writing jsonFile wihtout error');
-				return true;
-			} else {
-				throw('Could not write to file ' + jsonfile + ' : ' + err);
-			}
-		});
-	},
 };
 
 module.exports = jsonEndpointHelper;
