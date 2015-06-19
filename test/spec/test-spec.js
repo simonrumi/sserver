@@ -16,6 +16,7 @@ var BASE_URL = 'http://localhost:3000/';
     describe('Make an ajax get call', function() {    	
 		it('should return the contents of row 0, cell 0', function() {
             request.get(BASE_URL + 'db.json/rows/0/cells/0/contents', function(error, response, body) {
+                expect(false).toEqual('this should fail');
                 expect(body).toEqual('foo');
                 expect(response.statusCode).toBe(200);
                 done();
@@ -127,8 +128,9 @@ var BASE_URL = 'http://localhost:3000/';
             updateQuery.endpoint = 'bad/path';
             options.body = updateQuery; 
             request(options, function(error, response, body) {
-                expect(response.statusCode).toBe(400);
                 expect(response.statusMessage).toContain('Could not update');
+                expect(error).toEqual('what is the error for updating a nonexistant field?');
+                expect(response.statusCode).toBe(400);
                 done();
             });
         });
@@ -137,8 +139,9 @@ var BASE_URL = 'http://localhost:3000/';
             updateQuery['json-file'] = 'nonexistant.json';
             options.body = updateQuery;
             request(options, function(error, response, body) {
-                expect(response.statusCode).toBe(400);
                 expect(response.statusMessage).toContain('Could not update');
+                expect(error).toEqual('what is the error for updating a nonexistant json file?');
+                expect(response.statusCode).toBe(400);
                 done();
             });
         });
@@ -147,14 +150,26 @@ var BASE_URL = 'http://localhost:3000/';
             updateQuery['json-file'] = 'empty.json';
             options.body = updateQuery;
             request(options, function(error, response, body) {
-                expect(response.statusCode).toBe(400);
                 expect(response.statusMessage).toContain('Could not update');
+                expect(error).toEqual('what is the error for updating an empty json file?');
+                expect(response.statusCode).toBe(400);
                 done();
             });
         });
         
-        it('should lock the json file while it is being written to', function() {
-               expect('this test is not written yet').toBe(false); 
+        it('should prevent an update when the json file is locked', function() {
+            updateHelper.lockJson(jsonFile);
+            
+            updateQuery['json-file'] = jsonFile;
+            updateQuery.endpoint = endpointPath;
+            options.body = updateQuery;
+            
+            request(options, function(error, response, body) {
+                expect(response.statusMessage).toContain('Could not update');
+                expect(error).toEqual('what is the error for updating a locked json file?');
+                expect(response.statusCode).toBe(400);
+                done();
+            });
         });
     });
             

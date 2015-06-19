@@ -3,15 +3,15 @@
 var jsonFileParser = require('jsonfile');
 var endpointHelper = require('./json-endpoint-helper');
 
-var updateHelper = {	
-	
+var updateHelper = {
+
 	updateJson : function(request, response) { /// QQQQ rename to updateHandler
 		var i;
 		var errStr;
-		this.currentJsonFile = request.body['json-file']; 
+		this.currentJsonFile = request.body['json-file'];
 
 		console.log('updateJson: jsonFile = ' + this.currentJsonFile);
-		
+
 		if (this.currentJsonFile) {
 			this.getLockThenUpdate(request, response);
 		} else {
@@ -19,9 +19,9 @@ var updateHelper = {
 			endpointHelper.displayError(errStr, response);
 		}
 	},
-	
+
 	currentJsonFile : '',
-	
+
 	getLockThenUpdate : function(request, response) {
 		// TODO - this really needs to involve a listener that listens to decide if the file is free to lock
 		try {
@@ -32,53 +32,53 @@ var updateHelper = {
 			endpointHelper.displayError(err, response);
 		}
 	},
-	
+
 	lockJson : function(jsonFile) {
 		if (!jsonFile) {
 			throw ('trying to lock a non existant json file');
 		}
 		this.fileLocks[this.currentJsonFile] = true;
 	},
-	
+
 	fileLocks : {
 		// 'example.json' : true,
 		// 'someDb.json' : false,
 	},
-	
+
 	proceedWithUpdate : function(request, response, callback) {
 		var endpointParts;
 		var helper = this;
 		var updateEndpoint = request.body['endpoint'];
 		var newContent = request.body['content'];
 		console.log('\nproceedWithUpdate: helper.currentJsonFile is ' + helper.currentJsonFile);
-		
+
 		jsonFileParser.readFile(helper.currentJsonFile, function(err, contents) {
 			console.log('\n proceedWithUpdate: read jsonFile and got contents: ' + JSON.stringify(contents));
 			endpointParts = updateEndpoint.split('/');
 			try {
 				contents = helper.updateJsonAtEndpoint(endpointParts, contents, newContent);
 				console.log('\n proceedWithUpdate: updated json to: ' + JSON.stringify(contents));
-				helper.writeToJsonFile.call(helper, contents, callback);	
+				helper.writeToJsonFile.call(helper, contents, callback);
 				response.writeHead(200);
 				response.end(JSON.stringify(contents,null,3));
 			} catch (err2) {
-				endpointHelper.displayError('Could not update ' + helper.currentJsonFile + 
+				endpointHelper.displayError('Could not update ' + helper.currentJsonFile +
 					' at endpoint ' + updateEndpoint + ': ' + err2, response);
 			}
 			// TODO better than the fs thing above would be to deal with streams or promises or something
 		});
 	},
-	
+
 	releaseLock : function(jsonFile) {
 		// TODO this really needs to notify some listeners that the lock has been released
 		this.unlockJson(jsonFile);
 		this.currentJsonFile = '';
 	},
-	
+
 	unlockJson : function(jsonFile) {
 		this.fileLocks[jsonFile] = false;
 	},
-	
+
 	updateJsonAtEndpoint : function(endpointPathParts, jsonObj, newContent) {
 		var objectKey;
 		var childObj;
@@ -94,17 +94,17 @@ var updateHelper = {
 		}
 	},
 
-	// QQQQQQQQQQQ terrible mess here re binding and sending json file around
+	// TODO: terrible mess here re binding and sending json file around
 	// probably the solution is this:
 	// http://www.w3.org/wiki/JavaScript_best_practices#Avoid_globals
 	//
 	// also need to write tests to handle what happens when db.json is empty file (currrently crashes)
-	
+
 	writeToJsonFile : function(newContent, callback) {
 		var originalObj = this;
-		
+
 		console.log('\n writeToJsonFile: jsonFile=' + originalObj.currentJsonFile + ', newContent=' + JSON.stringify(newContent));
-		
+
 		jsonFileParser.writeFile(originalObj.currentJsonFile, newContent, function(err) {
 			if (!err) {
 				console.log('writeToJsonFile: writing jsonFile wihtout error');
